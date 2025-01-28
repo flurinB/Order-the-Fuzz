@@ -1,0 +1,11 @@
+{
+    "use_gml_file": false,
+  	"path_to_binary": "path/to/your/binary",
+  	"path_to_gml_file": "path/to/callgraph.gml",
+  	"memory_functions": ["malloc", "calloc", "memcpy"],
+  	"output_plot_path": "output/callgraph.png",
+  	"output_graph_path": "output/final_callgraph.gml",
+  	"reorder_amount": -1,
+  	"memory_call_count_weight": 1,
+  	"function_count_weight": 1
+}
