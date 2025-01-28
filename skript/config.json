@@ -7,5 +7,6 @@
   	"output_graph_path": "output/final_callgraph.gml",
   	"reorder_amount": -1,
   	"memory_call_count_weight": 1,
-  	"function_count_weight": 1
+  	"function_count_weight": 1,
+    "remove_sub_n_functions": false
 }

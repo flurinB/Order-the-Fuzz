@@ -9,11 +9,13 @@ import json
 Global Variables:
 """
 
-GLOBAL_metric_map = {} # Maps {addr -> Metric value}
+GLOBAL_metric_map = {}  # Maps {addr -> Metric value}
 GLOBAL_root_list = []
-GLOBAL_project = None # The main project
-GLOBAL_temp_project = None # The temporary project for each of the emulated analyses from each root
+GLOBAL_project = None  # The main project
+GLOBAL_temp_project = None  # The temporary project for each of the emulated analyses from each root
 GLOBAL_memory_functions = []
+GLOBAL_config = {}
+
 
 def init_global_variables(path_to_binary, memory_functions):
     global GLOBAL_project, GLOBAL_temp_project, GLOBAL_root_list
@@ -24,6 +26,7 @@ def init_global_variables(path_to_binary, memory_functions):
     GLOBAL_temp_project = angr.Project(path_to_binary, auto_load_libs=False)
 
     GLOBAL_memory_functions = memory_functions
+
 
 def init_global_variables_using_gml(path_to_binary, path_to_gml_file, memory_functions):
     global GLOBAL_project, GLOBAL_temp_project, GLOBAL_root_list
@@ -37,13 +40,16 @@ def init_global_variables_using_gml(path_to_binary, path_to_gml_file, memory_fun
 
     GLOBAL_memory_functions = memory_functions
 
+
 """
 Calculating the Metric Values: 
 """
 
+
 def add_to_visited_map(function):
     global GLOBAL_visited_map
     GLOBAL_visited_map.append(function)
+
 
 def count_amount_of_functions_in_subgraph(root_addr, covered_functions=[]):
     """
@@ -86,6 +92,7 @@ def count_amount_of_functions_in_subgraph(root_addr, covered_functions=[]):
 
     return (amount_of_functions, covered_functions)
 
+
 def count_amount_metrics_for_root_functions():
     global GLOBAL_root_list
 
@@ -102,6 +109,7 @@ def count_amount_metrics_for_root_functions():
         function_counts[root_func.name] = amount_of_functions
 
     return (memory_call_counts, function_counts)
+
 
 def create_memory_calls_hashmap():
     """
@@ -158,6 +166,7 @@ def count_memory_calls_in_call_subtree(root_addr, memory_calls_hashmap):
 
     return amount_of_memory_operations
 
+
 def get_normalized_values(map):
     """
     Converts the values of a map to normalized values (max element = 1)
@@ -174,6 +183,7 @@ def get_normalized_values(map):
     normalized_map = {k: v / max_value for k, v in map.items()}
     return normalized_map
 
+
 def calculate_metric_values_for_choosing_entry_point_order(alpha, beta):
     global GLOBAL_metric_map, GLOBAL_root_list
     memory_call_counts, function_counts = count_amount_metrics_for_root_functions()
@@ -185,9 +195,11 @@ def calculate_metric_values_for_choosing_entry_point_order(alpha, beta):
     function_counts = get_normalized_values(function_counts)
 
     for root_addr, root_func in root_list:
-        GLOBAL_metric_map[root_func] = alpha * memory_call_counts[root_func.name] + beta * function_counts[root_func.name]
+        GLOBAL_metric_map[root_func] = alpha * memory_call_counts[root_func.name] + beta * function_counts[
+            root_func.name]
 
     return
+
 
 def reorder(order):
     """
@@ -198,7 +210,8 @@ def reorder(order):
     remaining_functions_metric = {}
     covered_functions = []
     for root_addr in order:
-        amount_of_remaining_functions, covered_functions = count_amount_of_functions_in_subgraph(root_addr, covered_functions)
+        amount_of_remaining_functions, covered_functions = count_amount_of_functions_in_subgraph(root_addr,
+                                                                                                 covered_functions)
         remaining_functions_metric[root_addr] = amount_of_remaining_functions
 
     # Sort the functions in descending order of not yet visited functions
@@ -206,6 +219,7 @@ def reorder(order):
     new_order = list(new_order)
 
     return new_order
+
 
 def reorder_n_times(order, n):
     """
@@ -215,11 +229,7 @@ def reorder_n_times(order, n):
     new_order = []
     i = 0
 
-    if (new_order == order):
-        print("Order matches")
-
-    while(new_order != order):
-
+    while new_order != order:
         # If it has been reordered n times:
         if n != -1 and i >= n:
             break
@@ -233,10 +243,16 @@ def reorder_n_times(order, n):
 
         print("reordered, old order:", order, "new order:", new_order)
 
+    # NOTE: If you actually want to *use* the final new_order later,
+    # you should return it here. For demonstration, we return it:
+    return new_order if new_order else order
+
 
 """
 Building the Call Graph: 
 """
+
+
 def analyze_program(cfg_fast):
     """
     Analyzes the program by processing root functions and adjusting the call graph as needed.
@@ -255,11 +271,12 @@ def analyze_program(cfg_fast):
 
             # Create a blank state and build an emulated CFG starting from this function
             start_state = GLOBAL_temp_project.factory.blank_state(addr=func_addr)
-            temp_cfg_emu = GLOBAL_temp_project.analyses.CFGEmulated(fail_fast=True, starts=[func_addr], initial_state=start_state)
+            temp_cfg_emu = GLOBAL_temp_project.analyses.CFGEmulated(
+                fail_fast=True, starts=[func_addr], initial_state=start_state
+            )
 
             temp_cfg_edges_by_address = []
             for src_node, dst_node, edge_data in temp_cfg_emu.graph.edges(data=True):
-
                 jumpkind = edge_data.get("jumpkind", None)
                 # Only keep real call instructions, NO RETURNS!
                 if jumpkind != "Ijk_Call":
@@ -302,7 +319,11 @@ def analyze_program(cfg_fast):
     callgraph = GLOBAL_project.kb.functions.callgraph
 
     # Filtering the unnecessary functions out of the Call Graph
-    _ = filter_functions(GLOBAL_project.kb.functions.values(), callgraph)
+    _ = filter_functions(
+        GLOBAL_project.kb.functions.values(),
+        callgraph,
+        remove_sub_n=GLOBAL_config.get("remove_sub_n_functions", False)
+    )
 
     remove_self_loops(callgraph)
 
@@ -310,6 +331,7 @@ def analyze_program(cfg_fast):
     update_rootlist()
 
     return
+
 
 def edge_to_function_address(project, edge):
     """
@@ -335,6 +357,7 @@ def edge_to_function_address(project, edge):
         return None
 
     return (src_func.addr, dst_func.addr)
+
 
 def add_missing_call_edge(src_addr, dst_addr, root_node=None, difference_result=None):
     """
@@ -366,11 +389,12 @@ def add_missing_call_edge(src_addr, dst_addr, root_node=None, difference_result=
             f"difference result = {difference_result}"
         )
 
+
 def update_rootlist():
     """
     Updates the global root list with root functions and their names.
     """
-    global GLOBAL_root_list, GLOBAL_root_names, GLOBAL_project
+    global GLOBAL_root_list, GLOBAL_project
     callgraph = GLOBAL_project.kb.functions.callgraph
     root_list = []
     root_names = []
@@ -397,22 +421,42 @@ def remove_node_from_cg(callgraph, func_addr):
     else:
         print(f"Function {hex(func_addr)} is not in callgraph.")
 
-def filter_functions(functions, callgraph):
+
+def filter_functions(functions, callgraph, remove_sub_n=False):
     """
-    Removes from the callgraph any function that is PLT, syscall, simprocedure, etc.
+    Removes from the callgraph any function that is PLT, syscall, simprocedure, etc.,
+    or (optionally) named "sub_<something>" if remove_sub_n is True,
     unless its name or address is within the GLOBAL_memory_functions list.
+
     Returns the list of removed functions.
     """
     global GLOBAL_memory_functions
 
     exceptions = GLOBAL_memory_functions
-    to_remove = [
-        f for f in functions
-        if (f.is_syscall or f.is_plt or f.is_simprocedure)
-        and (f.name not in exceptions and f.addr not in exceptions)
-    ]
+    to_remove = []
+
+    for f in functions:
+        # 1) Already removed or invalid
+        if not callgraph.has_node(f.addr):
+            continue
+
+        # 2) If function is in the memory_functions list, skip it
+        if (f.name in exceptions) or (f.addr in exceptions):
+            continue
+
+        # 3) If remove_sub_n is True and the function name starts with 'sub_', remove it
+        #    For example: sub_401000, sub_1337ABC, etc.
+        if remove_sub_n and f.name.startswith("sub_"):
+            to_remove.append(f)
+            continue
+
+        # 4) If function is PLT, syscall, or simprocedure => remove
+        if f.is_syscall or f.is_plt or f.is_simprocedure:
+            to_remove.append(f)
+
     for function in to_remove:
         remove_node_from_cg(callgraph, function.addr)
+
     return to_remove
 
 
@@ -434,9 +478,12 @@ def update_progress_bar(progress_bar, task_description):
     progress_bar.set_description(task_description)
     progress_bar.update()
 
+
 """
 File Storage Handling: 
 """
+
+
 def save_graph_to_file(graph, path_to_file):
     """
     Saves the NetworkX graph to a file (GML).
@@ -458,12 +505,14 @@ def read_graph_from_file(path_to_file):
         nx.relabel_nodes(graph, mapping, copy=False)
     return graph
 
+
 def load_config(config_file):
     """
     Loads a config JSON file.
     """
     with open(config_file, 'r') as file:
         return json.load(file)
+
 
 def save_fuzzing_order_to_file(sorted_function_map, output_file):
     """
@@ -478,22 +527,23 @@ def save_fuzzing_order_to_file(sorted_function_map, output_file):
             file.write(f"{index}. Function: {func.name} at {hex(func.addr)} - Metric Value: {value:.4f}\n")
     print(f"Fuzzing order saved to {output_file}")
 
-if __name__ == '__main__':
-    config = load_config("config.json")
 
-    use_gml_file = config.get("use_gml_file", False)
-    path_to_binary = config.get("path_to_binary", "")
-    path_to_gml_file = config.get("path_to_gml_file", "")
+if __name__ == '__main__':
+    GLOBAL_config = load_config("config.json")  # <--- Store in global config
+
+    use_gml_file = GLOBAL_config.get("use_gml_file", False)
+    path_to_binary = GLOBAL_config.get("path_to_binary", "")
+    path_to_gml_file = GLOBAL_config.get("path_to_gml_file", "")
     # List of recognized memory operations (Example: ["malloc", "calloc", "printf", "memcpy"])
-    memory_functions = config.get("memory_functions", [])
-    output_plot_path = config.get("output_plot_path", "")
-    output_graph_path = config.get("output_graph_path", "")
+    memory_functions = GLOBAL_config.get("memory_functions", [])
+    output_plot_path = GLOBAL_config.get("output_plot_path", "")
+    output_graph_path = GLOBAL_config.get("output_graph_path", "")
     # Amount of times the order gets reordered, -1 = as many as possible
-    reorder_amount = config.get("reorder_amount", -1)
+    reorder_amount = GLOBAL_config.get("reorder_amount", -1)
     # Weight of the metric 1: amount of memory calls within subtree
-    memory_call_count_weight = config.get("memory_call_count_weight", 1)
+    memory_call_count_weight = GLOBAL_config.get("memory_call_count_weight", 1)
     # Weight of the metric 2: amount of functions within subtree
-    function_count_weight = config.get("function_count_weight", 1)
+    function_count_weight = GLOBAL_config.get("function_count_weight", 1)
 
     if use_gml_file:
         # Load the graph from a .gml file
@@ -523,29 +573,27 @@ if __name__ == '__main__':
         # Analyze the program (adding missing edges, etc.)
         analyze_program(cfg_fast)
 
-        # Plot and output results
-        plot_cg(GLOBAL_project.kb, output_plot_path, format="png")
-
         # Show updated root list if it changed
         update_rootlist()
         root_list, root_names = GLOBAL_root_list
         print("Root functions after analysis:", root_names)
 
         # Save final callgraph to file
-        save_graph_to_file(GLOBAL_project.kb.functions.callgraph, output_graph_path + ".gml")
+        save_graph_to_file(GLOBAL_project.kb.functions.callgraph, output_graph_path)
+
+        # Plot and output results
+        plot_cg(GLOBAL_project.kb, output_plot_path, format="png")
 
     # Calculate metrics and fuzzing order
     calculate_metric_values_for_choosing_entry_point_order(memory_call_count_weight, function_count_weight)
     sorted_by_value_ascending = dict(sorted(GLOBAL_metric_map.items(), key=lambda item: item[1], reverse=True))
-    save_fuzzing_order_to_file(sorted_by_value_ascending, "fuzzing_order.txt")
 
+    # Retrieve the raw addresses of the root functions in the metric map
     root_list, _ = GLOBAL_root_list
     keys_list = [f.addr for f in GLOBAL_metric_map.keys()]
 
-    order = reorder_n_times(keys_list, reorder_amount)
-    save_fuzzing_order_to_file(sorted_by_value_ascending, "fuzzing_order_reordered.txt")
+    # Reorder the final fuzzing list
+    final_order = reorder_n_times(keys_list, reorder_amount)
 
-
-
-
-
+    # Save the fuzzing order to file
+    save_fuzzing_order_to_file(sorted_by_value_ascending, "fuzzing_order.txt")
