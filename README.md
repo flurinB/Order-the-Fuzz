@@ -71,13 +71,20 @@ Edit the `config.json` file to set your analysis parameters:
 }
 \`\`\`
 
+#### Configuration Values
+
+use_gml_file: Boolean to indicate whether to analyse the given gml file 
+memory_functions: The memory functions used for the memory operations metric 
+
+
+
 ---
 
 ### 2. Run the Analysis
 
 Once the configuration is set, run the tool using:
 
-\`\`\`bash
+\`\`\`
 python3 main.py
 \`\`\`
 
@@ -88,32 +95,8 @@ python3 main.py
 After execution, the following output files will be generated:
 
 - **\`fuzzing_order.txt\`** - The initial prioritized order of functions to fuzz.
-- **\`fuzzing_order_reordered.txt\`** - The reordered fuzzing order after optimization.
 - **Call Graph Visualization** - A `.png` image if specified in the configuration.
 - **Call Graph File** - A `.gml` representation of the call graph.
-
----
-
-## Advanced Options
-
-### Reordering the Fuzzing Order
-
-You can refine the fuzzing order using:
-
-\`\`\`python
-order = reorder_n_times(keys_list, reorder_amount)
-save_fuzzing_order_to_file(sorted_by_value_ascending, "fuzzing_order_reordered.txt")
-\`\`\`
-
----
-
-## Troubleshooting
-
-- **Incorrect function names?**  
-  Ensure the binary is compiled with symbols or use debugging versions.
-
-- **Performance issues?**  
-  Consider adjusting the \`auto_load_libs\` setting when initializing the binary to avoid unnecessary dependency analysis.
 
 ---
 
@@ -137,5 +120,5 @@ This project is licensed under the MIT License. See the \`LICENSE\` file for det
 ## Contact
 
 For any questions or suggestions, please contact:  
-**[Your Name]** - [Your Email]  
-GitHub: [https://github.com/yourusername](https://github.com/yourusername)
+**[Flurin Baumann]** - [flurin.baumann@gmail.com]  
+GitHub: [https://github.com/flurinB](https://github.com/flurinB)
