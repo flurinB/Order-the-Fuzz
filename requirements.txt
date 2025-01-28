@@ -1,0 +1,4 @@
+angr==9.2.13
+networkx==2.8.8
+tqdm==4.65.0
+angrutils==9.2.13
