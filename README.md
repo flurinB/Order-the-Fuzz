@@ -1,8 +1,8 @@
-# Binary Fuzzing Entry Point Analyzer
+# Order-the-Fuzz
 
 ## Overview
 
-The **Binary Fuzzing Entry Point Analyzer** is a tool designed to assist security researchers in analyzing binary executables and identifying the most effective entry points for fuzz testing. By leveraging the **angr** binary analysis framework, the tool constructs a **call graph**, prioritizes root functions based on configurable metrics, and outputs an optimized fuzzing order.
+**Order-the-Fuzz** is a tool designed to assist security researchers in analyzing binary executables and identifying the most effective entry points for fuzz testing. By leveraging the **angr** binary analysis framework, the tool constructs a **call graph**, prioritizes root functions based on configurable metrics, and outputs an optimized fuzzing order.
 
 ## Features
 
