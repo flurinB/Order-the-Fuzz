@@ -20,7 +20,7 @@
 
 - **Configurable Analysis:**  
   - Adjustable parameters via a `config.json` file.
-  - Flexible reordering logic to maximize function coverage.
+  - Flexible reordering logic to optimize function coverage.
 
 ---
 
@@ -109,7 +109,7 @@ Ensure you have the following installed:
 
 
 
-### 2. Configure the Tool
+### 1. Configure the Tool
 
 Edit the `config.json` file to set your analysis parameters:
 
@@ -136,7 +136,7 @@ reorder_amount: Amount of refinement in the final order; -1 = as much as possibl
 
 ---
 
-### 3. Removing `sub_N` Functions from Analysis
+### 2. Removing `sub_N` Functions from Analysis
 
 If `sub_N` functions are irrelevant to your analysis, the tool includes a feature to filter them out from the call graph and subsequent analyses. This can be configured in the `config.json` file:
 
@@ -159,7 +159,7 @@ When this option is set to `true`:
 ---
 
 
-### 4. Run the Analysis
+### 3. Run the Analysis
 
 Once the configuration is set, run the tool using:
 
@@ -169,7 +169,7 @@ python3 main.py
 
 ---
 
-### 5. Output
+### 4. Output
 
 After execution, the following output files will be generated:
 
