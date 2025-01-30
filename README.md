@@ -66,6 +66,7 @@ This flexibility ensures the tool can adapt to your specific fuzzing goals, whet
 
 ---
 
+
 ## Installation
 
 ### Prerequisites
@@ -95,7 +96,19 @@ Ensure you have the following installed:
 
 ## Usage
 
-### 1. Configure the Tool
+### 1. How it works
+
+1.	Load the binary (or GML file) into angr.
+2.	Generate or import a call graph.
+3.	(Optionally) Filter out irrelevant or sub_N functions.
+4.	Compute custom metrics for each root function.
+5.	Rank root functions based on metric weights.
+6.	(Optionally) Reorder to refine coverage.
+7.	Output final fuzzing order + call graph visualizations.
+
+---
+
+### 2. Configure the Tool
 
 Edit the `config.json` file to set your analysis parameters:
 
@@ -122,7 +135,7 @@ reorder_amount: Amount of refinement in the final order; -1 = as much as possibl
 
 ---
 
-### Removing `sub_N` Functions from Analysis
+### 3. Removing `sub_N` Functions from Analysis
 
 If `sub_N` functions are irrelevant to your analysis, the tool includes a feature to filter them out from the call graph and subsequent analyses. This can be configured in the `config.json` file:
 
@@ -136,7 +149,7 @@ When this option is set to `true`:
 - Functions with placeholder names like `sub_N` will be excluded from the call graph.
 - These functions will not contribute to metrics or fuzzing order calculations.
 
-### How This Helps
+#### How This Helps
 
 - **Reduces Noise**: Filtering out `sub_N` functions ensures that only meaningful functions are analyzed.
 - **Focus on Relevant Functions**: Eliminates unnecessary functions, allowing you to concentrate on those most relevant to fuzzing or vulnerability discovery.
@@ -145,7 +158,7 @@ When this option is set to `true`:
 ---
 
 
-### 2. Run the Analysis
+### 4. Run the Analysis
 
 Once the configuration is set, run the tool using:
 
@@ -155,7 +168,7 @@ python3 main.py
 
 ---
 
-### 3. Output
+### 5. Output
 
 After execution, the following output files will be generated:
 
