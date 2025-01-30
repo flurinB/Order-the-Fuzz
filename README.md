@@ -66,6 +66,17 @@ This flexibility ensures the tool can adapt to your specific fuzzing goals, whet
 
 ---
 
+## How it works
+
+1.	Load the binary (or GML file) into angr.
+2.	Generate or import a call graph.
+3.	(Optionally) Filter out irrelevant or sub_N functions.
+4.	Compute custom metrics for each root function.
+5.	Rank root functions based on metric weights.
+6.	(Optionally) Reorder to refine coverage.
+7.	Output final fuzzing order + call graph visualizations.
+
+---
 
 ## Installation
 
@@ -96,17 +107,7 @@ Ensure you have the following installed:
 
 ## Usage
 
-### 1. How it works
 
-1.	Load the binary (or GML file) into angr.
-2.	Generate or import a call graph.
-3.	(Optionally) Filter out irrelevant or sub_N functions.
-4.	Compute custom metrics for each root function.
-5.	Rank root functions based on metric weights.
-6.	(Optionally) Reorder to refine coverage.
-7.	Output final fuzzing order + call graph visualizations.
-
----
 
 ### 2. Configure the Tool
 
