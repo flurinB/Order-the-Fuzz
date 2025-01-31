@@ -107,7 +107,7 @@ Ensure you have the following installed:
 1. Clone this repository:
 
    \`\`\`
-   git clone https://github.com/flurinB/order-the-fuzz.git\
+   git clone https://github.com/flurinB/order-the-fuzz.git \
    cd order-the-fuzz
    \`\`\`
 
