@@ -2,4 +2,3 @@ angr==9.2.6
 -e git+https://github.com/axt/angr-utils@7fd826a16b511727148f727150cea1d7ba6985f5#egg=angr_utils
 networkx==2.6.3
 tqdm==4.67.1
-angrutils==9.2.13
