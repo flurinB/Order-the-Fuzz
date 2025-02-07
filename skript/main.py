@@ -243,8 +243,6 @@ def reorder_n_times(order, n):
 
         print("reordered, old order:", order, "new order:", new_order)
 
-    # NOTE: If you actually want to *use* the final new_order later,
-    # you should return it here. For demonstration, we return it:
     return new_order if new_order else order
 
 
