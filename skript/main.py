@@ -108,6 +108,8 @@ def count_amount_metrics_for_root_functions():
         memory_call_counts[root_func.name] = amount_of_memory_calls
         function_counts[root_func.name] = amount_of_functions
 
+    print("memory calls: ", memory_call_counts)
+    print("function_counts: ", function_counts)
     return (memory_call_counts, function_counts)
 
 
@@ -152,12 +154,12 @@ def count_memory_calls_in_call_subtree(root_addr, memory_calls_hashmap):
             continue
         visited.add(current_func_addr)
 
-        amount_of_memory_operations += memory_calls_hashmap[current_func_addr]
-
         # Skip if the function itself is a memory operation
         func = GLOBAL_project.kb.functions.get_by_addr(current_func_addr)
         if func.name in GLOBAL_memory_functions:
             continue
+
+        amount_of_memory_operations += memory_calls_hashmap[current_func_addr]
 
         # Explore successors
         for succ_addr in callgraph.successors(current_func_addr):
