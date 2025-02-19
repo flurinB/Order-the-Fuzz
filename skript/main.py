@@ -51,7 +51,7 @@ def add_to_visited_map(function):
     GLOBAL_visited_map.append(function)
 
 
-def count_amount_of_functions_in_subgraph(root_addr, covered_functions=[]):
+def count_amount_of_functions_in_subgraph(root_addr, covered_functions=[], reordering=False):
     """
         Counts the amount of functions in the subgraph induced by root_addr
         The parameter "covered_functions" is important for the reordering "Metric",
@@ -67,6 +67,7 @@ def count_amount_of_functions_in_subgraph(root_addr, covered_functions=[]):
     amount_of_functions = 0
 
     while to_visit:
+
         current_func_addr = to_visit.pop()
         if current_func_addr in visited:
             continue
@@ -80,7 +81,7 @@ def count_amount_of_functions_in_subgraph(root_addr, covered_functions=[]):
         # Skip the function if it is already covered in a previous subtree (FOR REORDERING)
         if current_func_addr in covered_functions:
             continue
-        else:
+        elif reordering:
             covered_functions.append(current_func_addr)
 
         amount_of_functions = amount_of_functions + 1
@@ -213,7 +214,7 @@ def reorder(order):
     covered_functions = []
     for root_addr in order:
         amount_of_remaining_functions, covered_functions = count_amount_of_functions_in_subgraph(root_addr,
-                                                                                                 covered_functions)
+                                                                                                 covered_functions, reordering=True)
         remaining_functions_metric[root_addr] = amount_of_remaining_functions
 
     # Sort the functions in descending order of not yet visited functions
